@@ -5,10 +5,7 @@ import { CustomFilterProps } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import Image from 'next/image';
 
-
-const CustomFilter = ({ options, dataId }: CustomFilterProps) => {
-
-
+const CustomFilter = ({ options, data }: CustomFilterProps) => {
 
   const [selected, setSelected] = useState(options[0]);
   const [patientType, setPatientType] = useState(options[0].title); // Initialized with the first option
@@ -22,7 +19,7 @@ const CustomFilter = ({ options, dataId }: CustomFilterProps) => {
     );
   }
 
-  const handleUpdateParams = (e: { value: string }) => {
+  const handleUpdateParams = (e: { value: React.SetStateAction<string> }) => {
     setPatientType(e.value);
 
     // Logic to assign a random counter here
@@ -30,22 +27,22 @@ const CustomFilter = ({ options, dataId }: CustomFilterProps) => {
 
     // Generating a random token using uuid
     const randomToken = uuidv4();
-
-    const counterdata = dataId
-    console.log(counterdata);
+    
+    const lastId = data.slice(-1); // Slicing to get last value in Array
+    console.log(lastId)
 
     // Prepare the data to send to the backend
-    const data = {
+    const dataTable = {
       tokenNumber: randomToken,
       patientType: patientType,
       counterNumber: randomCounter,
-      counterId: counterdata
+      counterId: lastId
     };
 
     // Send a POST request to the backend API
     fetch('http://localhost:3000/api/counter', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(dataTable),
       headers: {
         'Content-Type': 'application/json',
       },

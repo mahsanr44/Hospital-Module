@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const processFlowSchema = new mongoose.Schema({
-  processId: { type: String, required: true },
+  processFlow: { type: [String], required: true },
 
 });
 

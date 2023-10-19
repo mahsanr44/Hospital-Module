@@ -16,14 +16,14 @@ export const patients = [
   export const flows = [
     {
       title: "Process Flow 1",
-      value: "Process Flow 1",
+      value: ["BP - Room1","DR - Room2" ],
     },
     {
       title: "Process Flow 2",
-      value: "Process Flow 2",
+      value:  ["MRI - Room3","DR - Room2" ],
     },
     {
       title: "Process Flow 3",
-      value: "Process Flow 3",
+      value:  ["DR - Room2","OPD - Room4" ],
     },
   ];
