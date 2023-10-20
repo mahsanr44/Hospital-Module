@@ -4,20 +4,17 @@ import React, { Fragment, useState } from 'react';
 import { CustomFilterProps } from '@/types';
 import Image from 'next/image';
 import { flows } from '@/constants';
-import ProcessData from './ProcessData';
-
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const Process = ({ options = flows }: CustomFilterProps) => {
 
-
     const [selected, setSelected] = useState(options[0]);
-    const [processFlow, setprocessFlow] = useState(options[0].value); // Initialized with the first option
+    const [currFlow, setCurrFlow] = useState([]); // Initialized with the first option
 
     const handleUpdateParams = (e: { value: string[]; }) => {
-        setprocessFlow(e.value);
-        console.log(processFlow);
         const dataTable = {
-            processFlow: processFlow,
+            processFlow: e.value,
         };
 
         // Send a POST request to the backend API
@@ -27,8 +24,30 @@ const Process = ({ options = flows }: CustomFilterProps) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-        });
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Access the currFlow from the response data
+                const currentFlow = data.currentFlow;
+                console.log(currentFlow)
+                const splitArray = currentFlow.map((item: string) => item.split(','));
+                console.log(splitArray)
+                setCurrFlow(splitArray)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
+
+    const router = useRouter()
+    const handleButtonClick = async () => {
+        // const res = await fetch("/api/counter", {
+        //     method: "DELETE",
+        // });
+        setTimeout(() => {
+            router.push('/timer');
+        }, 1000);
+    };
 
     // Frontend Filter
     return (
@@ -63,7 +82,9 @@ const Process = ({ options = flows }: CustomFilterProps) => {
                                         className={({ active }) => `relative cursor-default select-none py-2 px-4 ${active ? 'bg-blue-500 text-white' : 'text-gray-900'}`}>
                                         {({ selected }) => (
                                             <span
-                                                className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>{option.title}</span>
+                                                className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                                {option.title}
+                                            </span>
                                         )}
                                     </Listbox.Option>
                                 ))}
@@ -72,7 +93,34 @@ const Process = ({ options = flows }: CustomFilterProps) => {
                     </div>
                 </Listbox>
             </div>
-            <ProcessData/>
+            <div className="my-10">
+                <div className="flex mb-10 justify-center items-center flex-col">
+                    <h2 className="font-bold py-3">Process Flow Assigned:</h2>
+                    <ul>
+                        {
+                            currFlow.map((item: any, i) => (
+                                <div key={i} className='flex justify-center  items-center gap-5 py-1 '>
+                                    {item?.map((text: any, subIndex: number) => (
+                                        <li key={subIndex} >{text}</li>
+                                    ))}
+                                    <Link href={'/timer'} className='text-blue-500 font-medium'>
+                                        Enter in Room
+                                    </Link>
+                                </div>
+                            ))
+                        }
+                    </ul>
+                </div>
+                <div>
+                    <div className='flex justify-center items-center'>
+
+                        <button
+                            onClick={handleButtonClick}
+                            className="border-[3px] hover:border-blue-900 border-blue-700 hover:bg-blue-600 bg-blue-500 text-white rounded-lg py-2 px-2">Proceed Next</button>
+
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

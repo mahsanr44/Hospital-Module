@@ -6,7 +6,7 @@ export interface OptionProps {
 export interface CustomFilterProps {
   title: string;
   options: OptionProps[];
-  data: string | any | string[]; 
+  data?: string | any | string[]; 
 
 }
 

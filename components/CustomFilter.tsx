@@ -5,10 +5,11 @@ import { CustomFilterProps } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import Image from 'next/image';
 
-const CustomFilter = ({ options, data }: CustomFilterProps) => {
+const CustomFilter = ({ options }: CustomFilterProps) => {
 
   const [selected, setSelected] = useState(options[0]);
-  const [patientType, setPatientType] = useState(options[0].title); // Initialized with the first option
+  const [currId, setCurrId] = useState(null); // Initialized with the first option
+  const [currPatient, setCurrPatient] = useState(null); // Initialized with the first option
 
   // Generating random number to Assign a Counter
   const assignRandomCounter = () => {
@@ -19,24 +20,20 @@ const CustomFilter = ({ options, data }: CustomFilterProps) => {
     );
   }
 
-  const handleUpdateParams = (e: { value: React.SetStateAction<string> }) => {
-    setPatientType(e.value);
+  const handleUpdateParams = (e: { value: any }) => {
 
     // Logic to assign a random counter here
     const randomCounter = assignRandomCounter();
 
     // Generating a random token using uuid
     const randomToken = uuidv4();
-    
-    const lastId = data.slice(-1); // Slicing to get last value in Array
-    console.log(lastId)
+
 
     // Prepare the data to send to the backend
     const dataTable = {
       tokenNumber: randomToken,
-      patientType: patientType,
+      patientType: e.value,
       counterNumber: randomCounter,
-      counterId: lastId
     };
 
     // Send a POST request to the backend API
@@ -46,7 +43,18 @@ const CustomFilter = ({ options, data }: CustomFilterProps) => {
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Access the currId from the response data
+        const currentId = data.currId;
+        const currentPatient = data.paType;
+        setCurrPatient(currentPatient);
+        setCurrId(currentId);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   }
 
   // Frontend Filter
@@ -88,7 +96,18 @@ const CustomFilter = ({ options, data }: CustomFilterProps) => {
           </Transition>
         </div>
       </Listbox>
-
+      <div className=" flex gap-4 justify-center items-center">
+        <div className="mt-36 flex justify-center items-center flex-col">
+          {
+            currId ?
+              <>
+                <h2 className='font-bold'>Counter Assigned to: </h2> {currId}
+                <h2 className='font-bold mt-2'>Patient Type: </h2> {currPatient}
+              </>
+              : <h2 className='font-bold'>Please Select Patient Type </h2>
+          }
+        </div>
+      </div>
     </div>
   )
 }
