@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 
 const roomSchema = new mongoose.Schema({
-  tokenNumber: { type: String, required: true, unique: true },
-  processFlowId: { type: String, required: true },
-  checkInTime: { type: String, required: true },
-  checkOutTime: { type: String, required: true },
-  patientId: { type: String, required: true },
-  roomType: { type: String, required: true },
+  tokenId: {type:mongoose.Schema.Types.ObjectId, ref: 'Token', },
+  roomType: { type: String, },
+  totalTime: { type: String,  },
+  name: { type: String,  },
+  checked: { type: Boolean,  },
 });
 
 const Room = mongoose.models.Room || mongoose.model("Room", roomSchema);

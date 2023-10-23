@@ -23,7 +23,7 @@
 //     }
 //   }
 
-//   // GET API
+//   GET API
 //   export const GET = async (request: NextRequest, response: NextResponse) => {
 //     try {
 //       connectDB();

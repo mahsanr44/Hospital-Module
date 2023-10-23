@@ -1,4 +1,5 @@
 import ProcessFlow from "@/lib/models/processflow.model";
+import Token from "@/lib/models/token.model";
 import { connectDB } from "@/lib/mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,14 +11,13 @@ export const POST = async (request: NextRequest, response: NextResponse) => {
     // Destructuring
     const requestBody = await request.json();
     const { processFlow } = requestBody;
-
     // Check if the request body has the required fields
     if (processFlow) {
       // Saving the patient data to the database
       const pFlow = new ProcessFlow({
         processFlow,
       });
-      await pFlow.save();
+      var flowData = await pFlow.save();
     } else {
       console.log("Missing currentToken or patientType or counterNumber ");
     }
@@ -26,6 +26,7 @@ export const POST = async (request: NextRequest, response: NextResponse) => {
     return Response.json({
       message: "Patient data added successfully",
       currentFlow: processFlow,
+      currentFlowId: flowData,
     });
   } catch (error) {
     console.log(error);
@@ -46,7 +47,6 @@ export const GET = async (request: NextRequest, response: NextResponse) => {
       .exec();
 
     if (!data) throw new Error("No product fetched");
-
     // Map the data to extract and convert _id values to ObjectId
     return NextResponse.json({
       message: "OK",
@@ -59,19 +59,30 @@ export const GET = async (request: NextRequest, response: NextResponse) => {
 
 export const PUT = async (request: NextRequest, response: NextResponse) => {
   try {
-    // Database Connection
+    // Connect to the database
     connectDB();
 
-    // Find the last record in the ProcessFlow collection
-    const requestBody = await ProcessFlow.findOne({}).sort({ _id: -1 });
+    // Find the last Token record and update its processFlowId
+    const lastToken = await Token.findOne({}).sort({ _id: -1 });
 
-    const { processFlow } = requestBody;
+    if (!lastToken) {
+      return Response.json("No Token records found");
+    }
+    const requestBody = await request.json();
+    // Update the processFlowId
+    const { processFlowId } = requestBody;
+    // Update the lastToken's processFlowId
+    lastToken.processFlowId = processFlowId;
 
-    // Save the updated record
-    await processFlow.save();
-
-    // Sending a success response to the frontend
-    return Response.json("Last record updated successfully");
+    try {
+      // Save the updated record
+      await lastToken.save();
+      // Now you can access the saved document
+      return Response.json("Last Token record updated successfully");
+    } catch (error) {
+      console.error("Error while saving Token:", error);
+      // Handle the error appropriately, e.g., sending an error response
+    }
   } catch (error) {
     console.error(error);
     // Sending an error response to the frontend

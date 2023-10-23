@@ -1,6 +1,6 @@
 'use client';
 import { Listbox, Transition } from '@headlessui/react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { CustomFilterProps } from '@/types';
 import Image from 'next/image';
 import { flows } from '@/constants';
@@ -11,7 +11,7 @@ const Process = ({ options = flows }: CustomFilterProps) => {
 
     const [selected, setSelected] = useState(options[0]);
     const [currFlow, setCurrFlow] = useState([]); // Initialized with the first option
-
+    const [currFlowId, setCurrFlowId] = useState(''); // Initialized with the first option
     const handleUpdateParams = (e: { value: string[]; }) => {
         const dataTable = {
             processFlow: e.value,
@@ -29,15 +29,33 @@ const Process = ({ options = flows }: CustomFilterProps) => {
             .then(data => {
                 // Access the currFlow from the response data
                 const currentFlow = data.currentFlow;
-                console.log(currentFlow)
+                const currentFlowId = data.currentFlowId._id
+
                 const splitArray = currentFlow.map((item: string) => item.split(','));
-                console.log(splitArray)
                 setCurrFlow(splitArray)
+                setCurrFlowId(currentFlowId)
             })
             .catch(error => {
                 console.error('Error:', error);
             });
+
     }
+
+    useEffect(() => {
+        const tokenTable = {
+            processFlowId: currFlowId,
+        };
+        // Send a PUT request to the backend API
+        fetch('http://localhost:3000/api/process', {
+            method: 'PUT',
+            body: JSON.stringify(tokenTable),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    },
+        [currFlowId]
+    )
 
     const router = useRouter()
     const handleButtonClick = async () => {
@@ -113,11 +131,11 @@ const Process = ({ options = flows }: CustomFilterProps) => {
                 </div>
                 <div>
                     <div className='flex justify-center items-center'>
-
                         <button
                             onClick={handleButtonClick}
-                            className="border-[3px] hover:border-blue-900 border-blue-700 hover:bg-blue-600 bg-blue-500 text-white rounded-lg py-2 px-2">Proceed Next</button>
-
+                            className="border-[3px] hover:border-blue-900 border-blue-700 hover:bg-blue-600 bg-blue-500 text-white rounded-lg py-2 px-2">
+                            Proceed Next
+                        </button>
                     </div>
                 </div>
             </div>
